@@ -36,7 +36,8 @@ This web application is designed to manage and process loan details and correspo
     php artisan serve
     npm run dev
 
-
+    Screenshots Attached - https://docs.google.com/document/d/14S_pFDa5ATiJk-upTYLtHQm8c0wix9IMMvMzU0zzIWQ/edit?usp=sharing
+    
     Functionality
     1. Loan Details
         View Loan Details: Lists all loan details stored in the database.

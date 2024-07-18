@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\EmiDetailsService;
+use Illuminate\Support\MessageBag;
 
 class EmiDetailsController extends Controller
 {
@@ -24,8 +25,15 @@ class EmiDetailsController extends Controller
 
     public function processEmiCalculations(Request $request)
     {
-        $this->emiDetailsService->processEmiCalculations($request->all());
-        redirect()->route('emi-details.index');
+        $response = $this->emiDetailsService->processEmiCalculations($request->all());
+        if($response['status'] == true)
+        {
+            return redirect()->route('emi-details.index')->with('success', $response['message']);
+        }
+
+        $errors = new MessageBag(['error' => $response['message']]);
+
+        return redirect()->back()->withErrors($errors);
     }
 
 }

@@ -19,6 +19,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/loans-details', [LoanDetailsController::class, 'index'])->name('loan-details.index');
-Route::get('/emi-details', [EmiDetailsController::class, 'index'])->name('emi-details.index');
-Route::post('/emi-calculations', [EmiDetailsController::class, 'processEmiCalculations'])->name('process-emi-calculations');
+Auth::routes();
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/loans-details', [LoanDetailsController::class, 'index'])->name('loan-details.index');
+    Route::get('/emi-details', [EmiDetailsController::class, 'index'])->name('emi-details.index');
+    Route::post('/emi-calculations', [EmiDetailsController::class, 'processEmiCalculations'])->name('process-emi-calculations');
+
+});

@@ -60,7 +60,7 @@ class EmiDetailsService
     public function processEmiCalculations($postData=[])
     {
         Log::info('PROCESSING EMI CALCULATIONS...');
-        DB::beginTransaction();
+
         try
         {
             $this->generateEmiDetailsTable();
@@ -69,13 +69,21 @@ class EmiDetailsService
             $this->processEmiData();
             Log::info('EMI DATA PROCESSED SUCCESSFULLY');
 
-            DB::commit();
+            return [
+                'status' => true,
+                'message'=> 'EMI Data Processed Successfully.',
+                'data' => []
+            ];
         }
         catch(\Exception $e)
         {
             Log::error('EMI DATA PROCESSING FAILED DUE TO '.json_encode($e->getMessage()). ' ON LINE '.json_encode($e->getLine()));
 
-            DB::rollBack(); 
+            return [
+                'status' => false,
+                'message'=> $e->getMessage(),
+                'data' => []
+            ];
         }
 
     }

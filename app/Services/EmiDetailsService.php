@@ -80,7 +80,11 @@ class EmiDetailsService
 
     }
 
-
+    public function getMonths()
+    {
+        $minMaxDates = $this->emiDetailsRepository->getGloalMinMaxDates();
+        return $this->emiDetailsRepository->getMonths($minMaxDates['minDate'],$minMaxDates['maxDate']);
+    }
 
 
 

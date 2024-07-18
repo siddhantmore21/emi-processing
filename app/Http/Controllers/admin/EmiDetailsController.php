@@ -18,7 +18,8 @@ class EmiDetailsController extends Controller
     {
         $emiDetailsExists = $this->emiDetailsService->emiDetailsTableExists();
         $emiDetails = $emiDetailsExists ? $this->emiDetailsService->getAllEmiDetails() : [];
-        return view('admin.emi_details.index', compact('emiDetails'));
+        $months = $emiDetailsExists ? $this->emiDetailsService->getMonths() : [];
+        return view('admin.emi_details.index', compact('emiDetails','months'));
     }
 
     public function processEmiCalculations(Request $request)

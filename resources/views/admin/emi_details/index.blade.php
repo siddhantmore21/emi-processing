@@ -20,9 +20,9 @@
                 <tbody>
                     @foreach ($emiDetails as $detail)
                         <tr>
-                            <td>{{ $detail->clientid }}</td>
+                            <td>{{ $detail->client_id ?? 'NA' }}</td>
                             @foreach ($months as $month)
-                                <td>{{ isset($detail->$month) ? number_format($detail->$month, 2) : '0.00' }}</td>
+                                <td>{{ isset($detail->{$month}) ? number_format($detail->{$month}, 2) : '0.00' }}</td>
                             @endforeach
                         </tr>
                     @endforeach

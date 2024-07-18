@@ -28,12 +28,12 @@ class EmiDetailsRepository
 
     }
 
-    private function getMonths($minDate,$maxDate)
+    public function getMonths($minDate,$maxDate)
     {
         $columns = [];
-        $currentDate = Carbon::parse($minDate);
+        $currentDate = Carbon::parse($minDate)->startOfMonth();
 
-        while($currentDate <= Carbon::parse($maxDate))
+        while($currentDate <= Carbon::parse($maxDate)->startOfMonth())
         {
             $columns[] = $currentDate->format('Y_M');
             $currentDate->addMonth();
@@ -67,7 +67,7 @@ class EmiDetailsRepository
         DB::statement('DROP TABLE IF EXISTS emi_details');
     }
 
-    private function getGloalMinMaxDates()
+    public function getGloalMinMaxDates()
     {
         $minMaxDates = LoanDetails::selectRaw('MIN(first_payment_date) as min_date, MAX(last_payment_date) as max_date')
         ->first();
@@ -86,30 +86,44 @@ class EmiDetailsRepository
         $maxDate = $minMaxDates['maxDate'];
         $globalMonths = $this->getMonths($minDate,$maxDate);
 
+        Log::info('EMI TABLE INSERT GLOBAL MONTHS :: '.json_encode($globalMonths));
+
         $query = 'INSERT INTO emi_details (client_id, ' . implode(', ', $globalMonths) . ')';
 
         $query .= ' VALUES ';
         
         foreach ($loanDetails as $i => $loan) {
             $emiAmount = $loan->loan_amount / $loan->num_of_payment;
-            $lastMonth = Carbon::parse($loan->last_month)->format('Y-m');
-            $emiMonths = $this->getMonths($loan->first_payment_date,$loan->last_payment_date);
 
+            $emiMonths = $this->getMonths($loan->first_payment_date,$loan->last_payment_date);
+            Log::info('CLIENT ID :: '.json_encode($loan->id).' EMI TABLE INSERT EMI MONTHS :: '.json_encode($emiMonths));
+
+            $lastMonth = end($emiMonths);
+            Log::info('CLIENT ID :: '.json_encode($loan->id).' LAST MONTH :: '.json_encode($lastMonth));
+
+
+           
             $query .= '('.$loan->client_id.',';
 
             $totalEmi = 0.0;
 
             foreach ($globalMonths as $index => $month) {
+                Log::info('EMI MONTH :: '.json_encode($month));
+
+                Log::info('CLIENT ID :: '.json_encode($loan->id).' TOTAL EMI TILL NOW :: '.json_encode($totalEmi).' EMI MONTHLY :: '.json_encode($emiAmount).' LOAN AMOUNT :: '.json_encode($loan->loan_amount));
+
+                $emi = 0.00;
+
                 if(in_array($month,$emiMonths))
                 {
                     $emi = $month == $lastMonth ? $loan->loan_amount - $totalEmi : $emiAmount;
                     $emi = round($emi,2);
                     $totalEmi += $emi;
+
                 }
-                else
-                {
-                    $emi = 0.00;   
-                }
+
+                Log::info('CLIENT ID :: '.json_encode($loan->id).' TOTAL EMI TILL NOW :: '.json_encode($totalEmi).' NEW EMI MONTHLY :: '.json_encode($emi));
+
                 $query .= $index == (count($globalMonths) - 1) ? $emi.' ' : $emi.', ';
             }
 
